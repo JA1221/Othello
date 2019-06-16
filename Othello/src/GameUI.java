@@ -104,7 +104,7 @@ public class GameUI extends javax.swing.JFrame {
                 return 0;
             else if(chessBoard[x][y] != color)//遇到敵手 累計數量
                 opponent ++;
-        }while(chessBoard[x][y] == color);//遇到自己 跳出
+        }while(chessBoard[x][y] != color);//遇到自己 跳出
         
         return opponent;
     }
@@ -196,10 +196,12 @@ public class GameUI extends javax.swing.JFrame {
                     if(chessBoard[i][j] != 2)
                             alive[chessBoard[i][j]]++;
                     //記錄可下數
-                    for(int k = 0; k < 2; k++){
-                        if(putCheck(i, j, k, false))
-                            canPut[k]++;
-                    }
+                    if(chessBoard[i][j] == 2){
+                        for(int k = 0; k < 2; k++){
+                            if(putCheck(i, j, k, false))
+                                canPut[k]++;
+                        }
+                    }  
                 }
         }
         System.out.println("　　　黑 白");
@@ -331,7 +333,6 @@ public class GameUI extends javax.swing.JFrame {
     private final JLabel [][] chessLb = new JLabel[8][8];
     private final ImageIcon [] chessImg = new ImageIcon[3];//黑 白 建議
     private int chessBoard[][] = new int[8][8];
-    private int strategyTable[][] = new int[8][8];
     //                      右.右下.下.左下.左.左上.上.右上
     private int moveX[] = {0, 1, 1 ,1, 0, -1, -1, -1};
     private int moveY[] = {1, 1, 0, -1, -1, -1, 0, 1};
