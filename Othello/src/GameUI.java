@@ -88,81 +88,63 @@ public class GameUI extends javax.swing.JFrame {
         }
         playIcon.setIcon(chessImg[player]);
     }
-    //******************* 單向搜尋 可下哪種棋 *********************
-    private int oneWaySearch(int x, int y, int path){//單向搜尋 0黑棋能下 1白棋能下 2沒棋能下
-        x += moveX[path];//走第一步測試
-        y += moveY[path];
-
-        if(!properPlace(x,y))//越界
-                return 2;
-        else if(chessBoard[x][y] == 2)//旁邊是空棋
-                return 2;
-        int color = chessBoard[x][y];//讀取第一顆旗子顏色
-        //***********************************
-        do{//Go
-                x += moveX[path];
-                y += moveY[path];
-
-                if(!properPlace(x,y))//越界
-                        return 2;
-                else if(chessBoard[x][y] == 2)//不連續
-                        return 2;
-        }while(chessBoard[x][y] == color);//敵方子還連續 直到遇到我方棋子
-
-        if(color == 0)
-                return 1;
-        else
+    
+    //******************* 單向搜尋 *********************
+    private int oneWaySearch(int x, int y, int path, int color){//回傳可以吃幾顆 0=不能下
+        int opponent = 0;
+        
+        do{//走下一步
+            x += moveX[path];
+            y += moveY[path];
+            
+            if(chessBoard[x][y] == 2 | properPlace(x, y)) //遇到空格 or 出界 false
                 return 0;
+            else if(chessBoard[x][y] != color)//遇到敵手 累計數量
+                opponent ++;
+        }while(chessBoard[x][y] == color);//遇到自己 跳出
+        
+        return opponent;
     }
-    //***************** 搜尋8個方向 可下哪種棋 ***********************
-    private int checkPossible(int x, int y){//8向搜尋 0黑棋能下 1白棋能下 2沒棋能下 3都能下
-        boolean black = false, white = false;
-
-        if(chessBoard[x][y] != 2)//沒空位
-                return 2;
-
-        for(int i = 0; i < moveX.length; i++){//搜尋8個方向
-                int ans = oneWaySearch(x,y,i);
-                if(ans == 0)
-                        black = true;
-                else if(ans == 1)
-                        white = true;
-
-                if(white & black == true)//都能下 不用再判斷 跳出
-                        return 3;
+    
+    //***************** 搜尋8個方向 ***********************
+    private boolean putCheck(int x, int y, int color, boolean eat){
+            for(int i = 0; i < moveX.length; i++){
+                int num = oneWaySearch(x, y, i, color);
+                
+                if(num != 0){//可下
+                    if(eat)//需要執行吃棋
+                        eatChess(x, y, i, color, num);
+                    else//回傳可下
+                        return true;
+                }
+            }
+            
+            return false;
+    }
+    
+    //********************** 吃棋 *************************
+    private void eatChess(int x, int y, int path, int color, int count){
+        for(int i = 0; i < count; i++){
+            x += moveX[path];
+            y += moveY[path];
+            
+            chessBoard[x][y] = color;
         }
-
-        if(black)
-                return 0;
-        else if(white)
-                return 1;
-        else
-                return 2;				
     }
+    
     //****************** 放棋子 ture放置成功 false不能下 **********************
     private boolean putChess(int x, int y){//下棋            
         System.out.println(x + " " + y);
         
-        if(strategyTable[x][y] == player | strategyTable[x][y]==3){//玩家可以下
-            for(int i = 0; i < moveX.length; i++){
-                int ans = oneWaySearch(x,y,i);
-                int tempx = x, tempy =y;
-
-                if(ans == player){
-                    do{
-                        chessBoard[x][y] = player;
-                        x += moveX[i];
-                        y += moveY[i];						
-                    }while(chessBoard[x][y]!=player);
-                }
-                x = tempx;
-                y = tempy;
-            }
-            player = 1 - player;
+        if(chessBoard[x][y]!=2)
+            return false;
+        else if(putCheck(x, y, player,true))
             return true;
-        }
-        return false;
+        else
+            return false;
+        
     }
+    
     private void showInfo(){
         info.setText("黑棋：" + alive[0] + " 可下："  + canPut[0] + " 白棋：" + alive[1] + " 可下：" + canPut[1]);
     }
@@ -200,7 +182,7 @@ public class GameUI extends javax.swing.JFrame {
 
         for(int i = 0; i < chessBoard.length; i++){
                 for(int j = 0; j<chessBoard[i].length; j++){
-                    int ans = checkPossible(i,j);//取得可能性
+                    int ans = putCheck(i,j);//取得可能性
                     strategyTable[i][j] = ans;
 
                     if(chessBoard[i][j] != 2)
