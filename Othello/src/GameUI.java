@@ -77,8 +77,8 @@ public class GameUI extends javax.swing.JFrame {
         for(int i = 0; i < chessLb.length; i++){
             for(int j = 0; j < chessLb[i].length; j++){
        
-                if(chessBoard[i][j]==2){
-                    if(putHint & (strategyTable[i][j] == player | strategyTable[i][j]==3))
+                if(chessBoard[i][j]==2){//空位
+                    if(putHint & putCheck(i, j, player, false))
                         chessLb[i][j].setIcon(chessImg[2]);
                     else
                         chessLb[i][j].setIcon(null);
@@ -97,7 +97,10 @@ public class GameUI extends javax.swing.JFrame {
             x += moveX[path];
             y += moveY[path];
             
-            if(chessBoard[x][y] == 2 | properPlace(x, y)) //遇到空格 or 出界 false
+            if(!properPlace(x, y))//出界
+                return 0;
+            
+            if(chessBoard[x][y] == 2) //遇到空格
                 return 0;
             else if(chessBoard[x][y] != color)//遇到敵手 累計數量
                 opponent ++;
@@ -108,10 +111,14 @@ public class GameUI extends javax.swing.JFrame {
     
     //***************** 搜尋8個方向 ***********************
     private boolean putCheck(int x, int y, int color, boolean eat){
+            boolean flag = false;
+        
             for(int i = 0; i < moveX.length; i++){
                 int num = oneWaySearch(x, y, i, color);
                 
                 if(num != 0){//可下
+                    flag = true;
+                    
                     if(eat)//需要執行吃棋
                         eatChess(x, y, i, color, num);
                     else//回傳可下
@@ -119,7 +126,7 @@ public class GameUI extends javax.swing.JFrame {
                 }
             }
             
-            return false;
+            return flag;
     }
     
     //********************** 吃棋 *************************
@@ -136,11 +143,14 @@ public class GameUI extends javax.swing.JFrame {
     private boolean putChess(int x, int y){//下棋            
         System.out.println(x + " " + y);
         
-        if(chessBoard[x][y]!=2)
+        if(chessBoard[x][y]!=2)//不是空位 不能下
             return false;
-        else if(putCheck(x, y, player,true))
+        else if(putCheck(x, y, player,true)){//可下
+            chessBoard[x][y] = player;
+            player = 1 - player;
+            System.out.println("GameUI.putChess()");
             return true;
-        else
+        }else//不可下
             return false;
         
     }
@@ -158,7 +168,7 @@ public class GameUI extends javax.swing.JFrame {
                 showMessage("平手!");
             return false;
         }else if(canPut[player]==0){//無子可下換人
-            player = (int)(1 - player);
+            player = 1 - player;
             showMessage("無子可下，跳過這一局!");
             showBord();
             return false;
@@ -182,19 +192,13 @@ public class GameUI extends javax.swing.JFrame {
 
         for(int i = 0; i < chessBoard.length; i++){
                 for(int j = 0; j<chessBoard[i].length; j++){
-                    int ans = putCheck(i,j);//取得可能性
-                    strategyTable[i][j] = ans;
-
+                    //紀錄存活棋數
                     if(chessBoard[i][j] != 2)
-                            alive[chessBoard[i][j]]++;//紀錄存活棋數
-
-                    if(ans == 0)//計算可能性
-                            canPut[0]++;
-                    else if(ans == 1)
-                            canPut[1]++;
-                    else if(ans == 3){
-                            canPut[0]++;
-                            canPut[1]++;
+                            alive[chessBoard[i][j]]++;
+                    //記錄可下數
+                    for(int k = 0; k < 2; k++){
+                        if(putCheck(i, j, k, false))
+                            canPut[k]++;
                     }
                 }
         }
