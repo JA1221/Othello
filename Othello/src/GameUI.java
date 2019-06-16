@@ -22,11 +22,11 @@ public class GameUI extends javax.swing.JFrame {
         chessImg[2] = new ImageIcon(getClass().getResource("/images/ok.png"));
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/Cover.png")));
         
-        for(byte i = 0; i < chessLb.length; i++){
-            byte ii = i;
-            for(byte j = 0; j < chessLb[i].length; j++){
-                byte jj = j;
-                //建立棋子
+        for(int i = 0; i < chessLb.length; i++){
+            int ii = i;
+            for(int j = 0; j < chessLb[i].length; j++){
+                int jj = j;
+                //建立棋子Label 物件
                 chessLb[i][j] = new JLabel();
                 chessLb[i][j].setSize(50, 50);
                 getContentPane().add(chessLb[i][j]);
@@ -56,8 +56,8 @@ public class GameUI extends javax.swing.JFrame {
     }
     //初始化棋盤 黑白白黑 顯示
     private void initialize(){
-        for(byte i = 0; i < chessBoard.length; i++){
-                for(byte j=0; j < chessBoard[i].length; j++){
+        for(int i = 0; i < chessBoard.length; i++){
+                for(int j=0; j < chessBoard[i].length; j++){
                         chessBoard[i][j] = 2;
                 }
         }
@@ -65,7 +65,7 @@ public class GameUI extends javax.swing.JFrame {
         chessBoard[3][4] = 0;
         chessBoard[4][3] = 0;
         chessBoard[4][4] = 1;
-        player = 0;
+        player = 0;//黑手先
         
         showBord();
         showInfo();
@@ -76,6 +76,7 @@ public class GameUI extends javax.swing.JFrame {
         analysis();
         for(int i = 0; i < chessLb.length; i++){
             for(int j = 0; j < chessLb[i].length; j++){
+       
                 if(chessBoard[i][j]==2){
                     if(putHint & (strategyTable[i][j] == player | strategyTable[i][j]==3))
                         chessLb[i][j].setIcon(chessImg[2]);
@@ -88,7 +89,7 @@ public class GameUI extends javax.swing.JFrame {
         playIcon.setIcon(chessImg[player]);
     }
     //******************* 單向搜尋 可下哪種棋 *********************
-    private byte oneWaySearch(byte x, byte y, byte path){//單向搜尋 0黑棋能下 1白棋能下 2沒棋能下
+    private int oneWaySearch(int x, int y, int path){//單向搜尋 0黑棋能下 1白棋能下 2沒棋能下
         x += moveX[path];//走第一步測試
         y += moveY[path];
 
@@ -96,7 +97,7 @@ public class GameUI extends javax.swing.JFrame {
                 return 2;
         else if(chessBoard[x][y] == 2)//旁邊是空棋
                 return 2;
-        byte color = chessBoard[x][y];//讀取第一顆旗子顏色
+        int color = chessBoard[x][y];//讀取第一顆旗子顏色
         //***********************************
         do{//Go
                 x += moveX[path];
@@ -114,14 +115,14 @@ public class GameUI extends javax.swing.JFrame {
                 return 0;
     }
     //***************** 搜尋8個方向 可下哪種棋 ***********************
-    private byte checkPossible(byte x, byte y){//8向搜尋 0黑棋能下 1白棋能下 2沒棋能下 3都能下
+    private int checkPossible(int x, int y){//8向搜尋 0黑棋能下 1白棋能下 2沒棋能下 3都能下
         boolean black = false, white = false;
 
         if(chessBoard[x][y] != 2)//沒空位
                 return 2;
 
-        for(byte i = 0; i < moveX.length; i++){//搜尋8個方向
-                byte ans = oneWaySearch(x,y,i);
+        for(int i = 0; i < moveX.length; i++){//搜尋8個方向
+                int ans = oneWaySearch(x,y,i);
                 if(ans == 0)
                         black = true;
                 else if(ans == 1)
@@ -139,13 +140,13 @@ public class GameUI extends javax.swing.JFrame {
                 return 2;				
     }
     //****************** 放棋子 ture放置成功 false不能下 **********************
-    private boolean putChess(byte x, byte y){//下棋            
+    private boolean putChess(int x, int y){//下棋            
         System.out.println(x + " " + y);
         
         if(strategyTable[x][y] == player | strategyTable[x][y]==3){//玩家可以下
-            for(byte i = 0; i < moveX.length; i++){
-                byte ans = oneWaySearch(x,y,i);
-                byte tempx = x, tempy =y;
+            for(int i = 0; i < moveX.length; i++){
+                int ans = oneWaySearch(x,y,i);
+                int tempx = x, tempy =y;
 
                 if(ans == player){
                     do{
@@ -157,7 +158,7 @@ public class GameUI extends javax.swing.JFrame {
                 x = tempx;
                 y = tempy;
             }
-            player = (byte)(1 - player);
+            player = 1 - player;
             return true;
         }
         return false;
@@ -175,7 +176,7 @@ public class GameUI extends javax.swing.JFrame {
                 showMessage("平手!");
             return false;
         }else if(canPut[player]==0){//無子可下換人
-            player = (byte)(1 - player);
+            player = (int)(1 - player);
             showMessage("無子可下，跳過這一局!");
             showBord();
             return false;
@@ -184,7 +185,7 @@ public class GameUI extends javax.swing.JFrame {
         return false;
     }
     //******************** 判斷是否出界 ********************
-    private boolean properPlace(byte x, byte y){//合法位置(沒越界)
+    private boolean properPlace(int x, int y){//合法位置(沒越界)
         if(x >= 0 & y >= 0 & x < chessBoard.length & y < chessBoard.length)
                 return true;
         else
@@ -192,14 +193,14 @@ public class GameUI extends javax.swing.JFrame {
     }
     //********************** 分析棋盤 ******************
     private void analysis(){//分析剩餘.可下數量
-        for(byte i = 0; i < 2; i++){//歸零
+        for(int i = 0; i < 2; i++){//歸零
                 alive[i] = 0;
                 canPut[i] = 0;
         }
 
-        for(byte i = 0; i < chessBoard.length; i++){
-                for(byte j = 0; j<chessBoard[i].length; j++){
-                    byte ans = checkPossible(i,j);//取得可能性
+        for(int i = 0; i < chessBoard.length; i++){
+                for(int j = 0; j<chessBoard[i].length; j++){
+                    int ans = checkPossible(i,j);//取得可能性
                     strategyTable[i][j] = ans;
 
                     if(chessBoard[i][j] != 2)
@@ -342,15 +343,15 @@ public class GameUI extends javax.swing.JFrame {
     }
     //**************************************************************************
     private final JLabel [][] chessLb = new JLabel[8][8];
-    private final ImageIcon [] chessImg = new ImageIcon[3];//黑白 建議
-    private byte chessBoard[][] = new byte[8][8];
-    private byte strategyTable[][] = new byte[8][8];
+    private final ImageIcon [] chessImg = new ImageIcon[3];//黑 白 建議
+    private int chessBoard[][] = new int[8][8];
+    private int strategyTable[][] = new int[8][8];
     //                      右.右下.下.左下.左.左上.上.右上
-    private byte moveX[] = {0, 1, 1 ,1, 0, -1, -1, -1};
-    private byte moveY[] = {1, 1, 0, -1, -1, -1, 0, 1};
-    private byte alive[] = {0, 0};
-    private byte canPut[] = {0, 0};
-    private byte player = 0;//0黑 1白
+    private int moveX[] = {0, 1, 1 ,1, 0, -1, -1, -1};
+    private int moveY[] = {1, 1, 0, -1, -1, -1, 0, 1};
+    private int alive[] = {0, 0};
+    private int canPut[] = {0, 0};
+    private int player = 0;//0黑 1白
     private boolean putHint = false;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
