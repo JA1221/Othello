@@ -155,7 +155,7 @@ public class GameUI extends javax.swing.JFrame {
     
     //****************** 放棋子 ture放置成功 false不能下 **********************
     private boolean putChess(int board[][], int x, int y){//下棋            
-        System.out.println(x + " " + y);
+        System.out.println(((player==0) ? "黑" : "白") + (char)('A'+y) + (x+1));
         
         if(board[x][y]!=2)//不是空位 不能下
             return false;
@@ -206,7 +206,7 @@ public class GameUI extends javax.swing.JFrame {
         System.out.println("剩餘: " + alive[0] + " " + alive[1]);
         System.out.println("可下: " + canPut[0] + " " + canPut[1]);
         
-        AIcomputer(chessBoard);
+//        AIcomputer(chessBoard);
     }
     
     int[] analysis_Alive(int board[][]){
@@ -274,9 +274,9 @@ public class GameUI extends javax.swing.JFrame {
         
         for(int i = 0; i < 8; i++){
             for(int j = 0; j < 8; j++){
-                if(board[i][j]!=2) {
-                } else if(putCheck(board, i, j, player, false)){
-                    int score = next_Step_Score(board, x, y);
+                if(board[i][j]!=2) {//不是空格
+                } else if(putCheck(board, i, j, player, false)){//空格 且可下
+                    int score = next_Step_Score(board, i, j, player);
 
                     if( score> max){
                         max = score;
@@ -286,6 +286,10 @@ public class GameUI extends javax.swing.JFrame {
                 }           
             }
         }
+        System.out.println("alive_Score:" + alive_Score(board , player));
+        System.out.println("mobility_Score:" + mobility_Score(board, player));
+        System.out.println("weight_Score:" + weight_Score(board, player)); 
+        
         
         putChess(board, x, y);
         showBord();
@@ -294,35 +298,35 @@ public class GameUI extends javax.swing.JFrame {
         System.out.println(max);
     }
     
-    public void AIcomputer(int board[][]){
-        //int board[][], int depth, int alpha, int beta, boolean minimaxFlag
-        System.out.println("alive_Score:" + alive_Score(board));
-        System.out.println("mobility_Score:" + mobility_Score(board));
-        System.out.println("weight_Score:" + weight_Score(board));
-        
-        
+    public void AIcomputer(int board[][], int depth, int alpha, int beta, boolean minimaxFlag){
+        if(depth==0)
+
+        System.out.println("alive_Score:" + alive_Score(board , player));
+        System.out.println("mobility_Score:" + mobility_Score(board, player));
+        System.out.println("weight_Score:" + weight_Score(board, player));      
         
     }
     
-    int sore(int board[][]){
-        return 3*alive_Score(board) + 2*mobility_Score(board) + weight_Score(board);
-    }
-    int alive_Score(int board[][]){
-        int alive[] = analysis_Alive(chessBoard);
-        
-        return alive[0];
+    int sore(int board[][], int player){
+        return 2*alive_Score(board, player) + 1*mobility_Score(board, player) + 3*weight_Score(board, player);
     }
     
-    int mobility_Score(int board[][]){
-        int canPut[] = analysis_CanPut(chessBoard);
+    int alive_Score(int board[][], int player){
+        int alive[] = analysis_Alive(board);
         
-        return canPut[0];
+        return alive[player];
     }
     
-    int weight_Score(int board[][]){
+    int mobility_Score(int board[][], int player){
+        int canPut[] = analysis_CanPut(board);
+        
+        return canPut[player];
+    }
+    
+    int weight_Score(int board[][], int player){
         weight_Score_Calc calc = new weight_Score_Calc();
         
-        return calc.Score(board, 0);
+        return calc.Score(board, player);
     }
     
     int[][] copy_Array(int board[][]){
@@ -335,15 +339,15 @@ public class GameUI extends javax.swing.JFrame {
         return array;
     }
     
-    int next_Step_Score(int board[][], int x, int y){
-        int player = this.player;
+    int next_Step_Score(int board[][], int x, int y, int player){     
         board = copy_Array(board);
         
         putChess(board, x, y);
         this.player = player;
         
-        return sore(board);
+        return sore(board, player);
     }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
