@@ -34,7 +34,7 @@ public class GameUI extends javax.swing.JFrame {
                  //設定棋子監聽
                 chessLb[i][j].addMouseListener(new MouseAdapter() {
                     public void mousePressed(MouseEvent e) {
-                        putChess(ii, jj);
+                        putChess(chessBoard, ii, jj);
                         showBord();
                         showInfo();
                         endJudgment();
@@ -92,7 +92,7 @@ public class GameUI extends javax.swing.JFrame {
             for(int j = 0; j < chessLb[i].length; j++){
        
                 if(chessBoard[i][j]==2){//空位
-                    if(putHint & putCheck(i, j, player, false))
+                    if(putHint & putCheck(chessBoard, i, j, player, false))
                         chessLb[i][j].setIcon(chessImg[2]);
                     else
                         chessLb[i][j].setIcon(null);
@@ -104,7 +104,7 @@ public class GameUI extends javax.swing.JFrame {
     }
     
     //******************* 單向搜尋 *********************
-    private int oneWaySearch(int x, int y, int path, int color){//回傳可以吃幾顆 0=不能下
+    private int oneWaySearch(int board[][], int x, int y, int path, int color){//回傳可以吃幾顆 0=不能下
         int opponent = 0;
         
         do{//走下一步
@@ -114,27 +114,27 @@ public class GameUI extends javax.swing.JFrame {
             if(!properPlace(x, y))//出界
                 return 0;
             
-            if(chessBoard[x][y] == 2) //遇到空格
+            if(board[x][y] == 2) //遇到空格
                 return 0;
-            else if(chessBoard[x][y] != color)//遇到敵手 累計數量
+            else if(board[x][y] != color)//遇到敵手 累計數量
                 opponent ++;
-        }while(chessBoard[x][y] != color);//遇到自己 跳出
+        }while(board[x][y] != color);//遇到自己 跳出
         
         return opponent;
     }
     
     //***************** 搜尋8個方向 ***********************
-    private boolean putCheck(int x, int y, int color, boolean eat){
+    private boolean putCheck(int board[][], int x, int y, int color, boolean eat){
             boolean flag = false;
         
             for(int i = 0; i < 8; i++){
-                int num = oneWaySearch(x, y, i, color);
+                int num = oneWaySearch(board, x, y, i, color);
                 
                 if(num != 0){//可下
                     flag = true;
                     
                     if(eat)//需要執行吃棋
-                        eatChess(x, y, i, color, num);
+                        eatChess(board, x, y, i, color, num);
                     else//回傳可下
                         return true;
                 }
@@ -144,23 +144,23 @@ public class GameUI extends javax.swing.JFrame {
     }
     
     //********************** 吃棋 *************************
-    private void eatChess(int x, int y, int path, int color, int count){
+    private void eatChess(int board[][], int x, int y, int path, int color, int count){
         for(int i = 0; i < count; i++){
             x += moveX[path];
             y += moveY[path];
             
-            chessBoard[x][y] = color;
+            board[x][y] = color;
         }
     }
     
     //****************** 放棋子 ture放置成功 false不能下 **********************
-    private boolean putChess(int x, int y){//下棋            
+    private boolean putChess(int board[][], int x, int y){//下棋            
         System.out.println(x + " " + y);
         
-        if(chessBoard[x][y]!=2)//不是空位 不能下
+        if(board[x][y]!=2)//不是空位 不能下
             return false;
-        else if(putCheck(x, y, player,true)){//可下
-            chessBoard[x][y] = player;
+        else if(putCheck(board, x, y, player,true)){//可下
+            board[x][y] = player;
             coordinate_Show(player, x, y);
             player = 1 - player;
             return true;
@@ -214,8 +214,8 @@ public class GameUI extends javax.swing.JFrame {
         
         for(int i = 0; i < 8; i++){
                 for(int j = 0; j<8; j++){
-                    if(chessBoard[i][j] != 2)
-                            alive[chessBoard[i][j]]++;
+                    if(board[i][j] != 2)
+                            alive[board[i][j]]++;
                 }
         }
         
@@ -227,9 +227,9 @@ public class GameUI extends javax.swing.JFrame {
         
         for(int i = 0; i < 8; i++){
                 for(int j = 0; j<8; j++){
-                    if(chessBoard[i][j] == 2){
+                    if(board[i][j] == 2){
                         for(int k = 0; k < 2; k++){
-                            if(putCheck(i, j, k, false))
+                            if(putCheck(board, i, j, k, false))
                                 canPut[k]++;
                         }
                     }  
@@ -243,17 +243,17 @@ public class GameUI extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(null, s, "注意", JOptionPane.WARNING_MESSAGE);
     }
     
-    public void computer(){
+    public void computer(int board[][]){
         int max = Integer.MIN_VALUE , x = 0, y = 0;
         
         for(int i = 0; i < 8; i++){
             for(int j = 0; j < 8; j++){
-                if(chessBoard[i][j]!=2)continue;
+                if(board[i][j]!=2)continue;
                 
                 int eatNum = 0;
                 
                 for(int k = 0; k < 8; k++){
-                    eatNum += oneWaySearch(i, j, k, player);
+                    eatNum += oneWaySearch(board, i, j, k, player);
                 }
                 
                 if(eatNum > max){
@@ -263,10 +263,35 @@ public class GameUI extends javax.swing.JFrame {
                 }
             }
         }
-        putChess(x, y);
+        putChess(board, x, y);
         showBord();
         showInfo();
         endJudgment();
+    }
+    
+    public void computer2(int board[][]){
+        int max = Integer.MIN_VALUE , x = 0, y = 0;
+        
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                if(board[i][j]!=2) {
+                } else if(putCheck(board, i, j, player, false)){
+                    int score = next_Step_Score(board, x, y);
+
+                    if( score> max){
+                        max = score;
+                        x = i;
+                        y = j;
+                    }
+                }           
+            }
+        }
+        
+        putChess(board, x, y);
+        showBord();
+        showInfo();
+        endJudgment();
+        System.out.println(max);
     }
     
     public void AIcomputer(int board[][]){
@@ -279,6 +304,9 @@ public class GameUI extends javax.swing.JFrame {
         
     }
     
+    int sore(int board[][]){
+        return 3*alive_Score(board) + 2*mobility_Score(board) + weight_Score(board);
+    }
     int alive_Score(int board[][]){
         int alive[] = analysis_Alive(chessBoard);
         
@@ -295,6 +323,26 @@ public class GameUI extends javax.swing.JFrame {
         weight_Score_Calc calc = new weight_Score_Calc();
         
         return calc.Score(board, 0);
+    }
+    
+    int[][] copy_Array(int board[][]){
+        int array[][] = new int[8][8];
+        
+        for(int i = 0; i < 8; i ++){
+            System.arraycopy(board[i], 0, array[i], 0, 8);
+        }
+        
+        return array;
+    }
+    
+    int next_Step_Score(int board[][], int x, int y){
+        int player = this.player;
+        board = copy_Array(board);
+        
+        putChess(board, x, y);
+        this.player = player;
+        
+        return sore(board);
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -411,7 +459,7 @@ public class GameUI extends javax.swing.JFrame {
 
     private void computerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_computerActionPerformed
         // TODO add your handling code here:
-        computer();
+        computer2(chessBoard);
     }//GEN-LAST:event_computerActionPerformed
 
     /**
