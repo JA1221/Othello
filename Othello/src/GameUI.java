@@ -16,6 +16,7 @@ public class GameUI extends javax.swing.JFrame {
         chessLocate();
         initialize();
     }
+    
     private void chessComponents(){
         chessImg[0] = new ImageIcon(getClass().getResource("/images/black.png"));
         chessImg[1] = new ImageIcon(getClass().getResource("/images/white.png"));
@@ -37,12 +38,15 @@ public class GameUI extends javax.swing.JFrame {
                         showBord();
                         showInfo();
                         endJudgment();
+//                        if(endJudgment())
+//                            computer();
                     }
                 });                
             }       
         }
         
     }
+    
     //棋子對齊棋盤
     private void chessLocate(){ 
         for(int i = 0; i < chessLb.length; i++){
@@ -54,6 +58,7 @@ public class GameUI extends javax.swing.JFrame {
             }
         }
     }
+    
     //初始化棋盤 黑白白黑 顯示
     private void initialize(){
         for(int i = 0; i < chessBoard.length; i++){
@@ -71,12 +76,15 @@ public class GameUI extends javax.swing.JFrame {
         showInfo();
         coordinate_Show();
     }
+    
     private void coordinate_Show(int player, int x, int y){
         coordinate_Show.setText(((player==0) ? "黑" : "白") + (char)('A'+y) + (x+1));
     }
+    
     private void coordinate_Show(){
         coordinate_Show.setText("");
     }
+    
     //***************** 顯示棋盤 ***********************
     private void showBord(){
         analysis();
@@ -177,10 +185,10 @@ public class GameUI extends javax.swing.JFrame {
             player = 1 - player;
             showMessage("無子可下，跳過這一局!");
             showBord();
-            return false;
+            return true;
         }
         
-        return false;
+        return true;
     }
     //******************** 判斷是否出界 ********************
     private boolean properPlace(int x, int y){//合法位置(沒越界)
@@ -218,6 +226,34 @@ public class GameUI extends javax.swing.JFrame {
     public void showMessage(String s){
         JOptionPane.showMessageDialog(null, s, "注意", JOptionPane.WARNING_MESSAGE);
     }
+    
+    public void computer(){
+//        int tempBoard[][] = new int[chessBoard.length][chessBoard[0].length];
+        int max = Integer.MIN_VALUE , x = 0, y = 0;
+        
+        for(int i = 0; i < chessBoard.length; i++){
+            for(int j = 0; j < chessBoard.length; j++){
+                if(chessBoard[i][j]!=2)continue;
+                
+                int eatNum = 0;
+                
+                for(int k = 0; k < moveX.length; k++){
+                    eatNum += oneWaySearch(i, j, k, player);
+                }
+//                tempBoard[i][j] = eatNum;
+                
+                if(eatNum > max){
+                    max = eatNum;
+                    x = i;
+                    y = j;
+                }
+            }
+        }
+        putChess(x, y);
+        showBord();
+        showInfo();
+        endJudgment();
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -227,6 +263,7 @@ public class GameUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        computer = new javax.swing.JButton();
         coordinateX = new javax.swing.JLabel();
         coordinateY = new javax.swing.JLabel();
         coordinate_Show = new javax.swing.JLabel();
@@ -243,6 +280,15 @@ public class GameUI extends javax.swing.JFrame {
         setResizable(false);
         setSize(new java.awt.Dimension(700, 470));
         getContentPane().setLayout(null);
+
+        computer.setText("電腦下棋");
+        computer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                computerActionPerformed(evt);
+            }
+        });
+        getContentPane().add(computer);
+        computer.setBounds(540, 310, 97, 29);
 
         coordinateX.setFont(new java.awt.Font("Lucida Grande", 0, 42)); // NOI18N
         coordinateX.setText("<html> <body>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<body> </html> ");
@@ -320,6 +366,11 @@ public class GameUI extends javax.swing.JFrame {
         initialize();
     }//GEN-LAST:event_restartBtMousePressed
 
+    private void computerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_computerActionPerformed
+        // TODO add your handling code here:
+        computer();
+    }//GEN-LAST:event_computerActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -370,6 +421,7 @@ public class GameUI extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel background;
     private javax.swing.JLabel board;
+    private javax.swing.JButton computer;
     private javax.swing.JLabel coordinateX;
     private javax.swing.JLabel coordinateY;
     private javax.swing.JLabel coordinate_Show;
