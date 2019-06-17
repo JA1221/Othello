@@ -61,8 +61,8 @@ public class GameUI extends javax.swing.JFrame {
     
     //初始化棋盤 黑白白黑 顯示
     private void initialize(){
-        for(int i = 0; i < chessBoard.length; i++){
-                for(int j=0; j < chessBoard[i].length; j++){
+        for(int i = 0; i < 8; i++){
+                for(int j=0; j < 8; j++){
                         chessBoard[i][j] = 2;
                 }
         }
@@ -127,7 +127,7 @@ public class GameUI extends javax.swing.JFrame {
     private boolean putCheck(int x, int y, int color, boolean eat){
             boolean flag = false;
         
-            for(int i = 0; i < moveX.length; i++){
+            for(int i = 0; i < 8; i++){
                 int num = oneWaySearch(x, y, i, color);
                 
                 if(num != 0){//可下
@@ -192,24 +192,41 @@ public class GameUI extends javax.swing.JFrame {
     }
     //******************** 判斷是否出界 ********************
     private boolean properPlace(int x, int y){//合法位置(沒越界)
-        if(x >= 0 & y >= 0 & x < chessBoard.length & y < chessBoard.length)
+        if(x >= 0 & y >= 0 & x < 8 & y < 8)
                 return true;
         else
                 return false;
     }
     //********************** 分析棋盤 ******************
     private void analysis(){//分析剩餘.可下數量
-        for(int i = 0; i < 2; i++){//歸零
-                alive[i] = 0;
-                canPut[i] = 0;
-        }
-
-        for(int i = 0; i < chessBoard.length; i++){
-                for(int j = 0; j<chessBoard[i].length; j++){
-                    //紀錄存活棋數
+        alive = analysis_Alive(chessBoard);
+        canPut = analysis_CanPut(chessBoard);
+        
+        System.out.println("　　　黑 白");
+        System.out.println("剩餘: " + alive[0] + " " + alive[1]);
+        System.out.println("可下: " + canPut[0] + " " + canPut[1]);
+        
+        AIcomputer(chessBoard);
+    }
+    
+    int[] analysis_Alive(int board[][]){
+        int alive[] = new int[2];
+        
+        for(int i = 0; i < 8; i++){
+                for(int j = 0; j<8; j++){
                     if(chessBoard[i][j] != 2)
                             alive[chessBoard[i][j]]++;
-                    //記錄可下數
+                }
+        }
+        
+        return alive;
+    }
+    
+    int[] analysis_CanPut(int board[][]){
+        int canPut[] = new int[2];
+        
+        for(int i = 0; i < 8; i++){
+                for(int j = 0; j<8; j++){
                     if(chessBoard[i][j] == 2){
                         for(int k = 0; k < 2; k++){
                             if(putCheck(i, j, k, false))
@@ -218,9 +235,8 @@ public class GameUI extends javax.swing.JFrame {
                     }  
                 }
         }
-        System.out.println("　　　黑 白");
-        System.out.println("剩餘: " + alive[0] + " " + alive[1]);
-        System.out.println("可下: " + canPut[0] + " " + canPut[1]);
+        
+        return canPut;
     }
     //****************************************
     public void showMessage(String s){
@@ -228,19 +244,17 @@ public class GameUI extends javax.swing.JFrame {
     }
     
     public void computer(){
-//        int tempBoard[][] = new int[chessBoard.length][chessBoard[0].length];
         int max = Integer.MIN_VALUE , x = 0, y = 0;
         
-        for(int i = 0; i < chessBoard.length; i++){
-            for(int j = 0; j < chessBoard.length; j++){
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
                 if(chessBoard[i][j]!=2)continue;
                 
                 int eatNum = 0;
                 
-                for(int k = 0; k < moveX.length; k++){
+                for(int k = 0; k < 8; k++){
                     eatNum += oneWaySearch(i, j, k, player);
                 }
-//                tempBoard[i][j] = eatNum;
                 
                 if(eatNum > max){
                     max = eatNum;
@@ -253,6 +267,34 @@ public class GameUI extends javax.swing.JFrame {
         showBord();
         showInfo();
         endJudgment();
+    }
+    
+    public void AIcomputer(int board[][]){
+        //int board[][], int depth, int alpha, int beta, boolean minimaxFlag
+        System.out.println("alive_Score:" + alive_Score(board));
+        System.out.println("mobility_Score:" + mobility_Score(board));
+        System.out.println("weight_Score:" + weight_Score(board));
+        
+        
+        
+    }
+    
+    int alive_Score(int board[][]){
+        int alive[] = analysis_Alive(chessBoard);
+        
+        return alive[0];
+    }
+    
+    int mobility_Score(int board[][]){
+        int canPut[] = analysis_CanPut(chessBoard);
+        
+        return canPut[0];
+    }
+    
+    int weight_Score(int board[][]){
+        weight_Score_Calc calc = new weight_Score_Calc();
+        
+        return calc.Score(board, 0);
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -288,14 +330,14 @@ public class GameUI extends javax.swing.JFrame {
             }
         });
         getContentPane().add(computer);
-        computer.setBounds(540, 310, 97, 29);
+        computer.setBounds(540, 310, 97, 23);
 
-        coordinateX.setFont(new java.awt.Font("Lucida Grande", 0, 42)); // NOI18N
+        coordinateX.setFont(new java.awt.Font("Times New Roman", 0, 42)); // NOI18N
         coordinateX.setText("<html> <body>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<body> </html> ");
         getContentPane().add(coordinateX);
         coordinateX.setBounds(10, 40, 30, 400);
 
-        coordinateY.setFont(new java.awt.Font("Lucida Grande", 0, 31)); // NOI18N
+        coordinateY.setFont(new java.awt.Font("Times New Roman", 0, 36)); // NOI18N
         coordinateY.setText("A   B   C   D   E   F   G   H");
         getContentPane().add(coordinateY);
         coordinateY.setBounds(50, 10, 390, 30);
@@ -304,7 +346,7 @@ public class GameUI extends javax.swing.JFrame {
         coordinate_Show.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         coordinate_Show.setText("黑：A1");
         getContentPane().add(coordinate_Show);
-        coordinate_Show.setBounds(550, 200, 80, 22);
+        coordinate_Show.setBounds(550, 200, 80, 27);
 
         info.setFont(new java.awt.Font("Lucida Grande", 1, 18)); // NOI18N
         info.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -326,6 +368,7 @@ public class GameUI extends javax.swing.JFrame {
 
         hint.setFont(new java.awt.Font("標楷體", 1, 36)); // NOI18N
         hint.setText("提示");
+        hint.setOpaque(false);
         hint.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 hintActionPerformed(evt);
