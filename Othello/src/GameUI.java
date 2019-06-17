@@ -47,8 +47,8 @@ public class GameUI extends javax.swing.JFrame {
     private void chessLocate(){ 
         for(int i = 0; i < chessLb.length; i++){
             for(int j = 0; j < chessLb[i].length; j++){
-                 int x = 2 + board.getX() + 50*i;
-                 int y = 5 + board.getY() + 50*j;
+                 int x = 2 + board.getX() + 50*j;
+                 int y = 5 + board.getY() + 50*i;
 
                  chessLb[i][j].setLocation(x, y); 
             }
@@ -69,8 +69,14 @@ public class GameUI extends javax.swing.JFrame {
         
         showBord();
         showInfo();
+        coordinate_Show();
     }
-
+    private void coordinate_Show(int player, int x, int y){
+        coordinate_Show.setText(((player==0) ? "黑" : "白") + (char)('A'+y) + (x+1));
+    }
+    private void coordinate_Show(){
+        coordinate_Show.setText("");
+    }
     //***************** 顯示棋盤 ***********************
     private void showBord(){
         analysis();
@@ -147,8 +153,8 @@ public class GameUI extends javax.swing.JFrame {
             return false;
         else if(putCheck(x, y, player,true)){//可下
             chessBoard[x][y] = player;
+            coordinate_Show(player, x, y);
             player = 1 - player;
-            System.out.println("GameUI.putChess()");
             return true;
         }else//不可下
             return false;
@@ -221,6 +227,9 @@ public class GameUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        coordinateX = new javax.swing.JLabel();
+        coordinateY = new javax.swing.JLabel();
+        coordinate_Show = new javax.swing.JLabel();
         info = new javax.swing.JLabel();
         restartBt = new javax.swing.JLabel();
         hint = new javax.swing.JCheckBox();
@@ -230,16 +239,33 @@ public class GameUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("黑白棋");
-        setMinimumSize(new java.awt.Dimension(730, 530));
+        setMinimumSize(new java.awt.Dimension(700, 500));
+        setResizable(false);
         setSize(new java.awt.Dimension(700, 470));
         getContentPane().setLayout(null);
+
+        coordinateX.setFont(new java.awt.Font("Lucida Grande", 0, 42)); // NOI18N
+        coordinateX.setText("<html> <body>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<body> </html> ");
+        getContentPane().add(coordinateX);
+        coordinateX.setBounds(10, 40, 30, 400);
+
+        coordinateY.setFont(new java.awt.Font("Lucida Grande", 0, 31)); // NOI18N
+        coordinateY.setText("A   B   C   D   E   F   G   H");
+        getContentPane().add(coordinateY);
+        coordinateY.setBounds(50, 10, 390, 30);
+
+        coordinate_Show.setFont(new java.awt.Font("Lucida Grande", 0, 18)); // NOI18N
+        coordinate_Show.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        coordinate_Show.setText("黑：A1");
+        getContentPane().add(coordinate_Show);
+        coordinate_Show.setBounds(550, 200, 80, 22);
 
         info.setFont(new java.awt.Font("Lucida Grande", 1, 18)); // NOI18N
         info.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         info.setText("黑棋：0 可下：0 白棋：0 可下：0");
         info.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         getContentPane().add(info);
-        info.setBounds(40, 430, 403, 30);
+        info.setBounds(40, 440, 403, 30);
 
         restartBt.setFont(new java.awt.Font("Lucida Grande", 1, 24)); // NOI18N
         restartBt.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -260,7 +286,7 @@ public class GameUI extends javax.swing.JFrame {
             }
         });
         getContentPane().add(hint);
-        hint.setBounds(530, 210, 110, 40);
+        hint.setBounds(530, 230, 110, 40);
 
         playIcon.setFont(new java.awt.Font("標楷體", 1, 36)); // NOI18N
         playIcon.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -274,7 +300,7 @@ public class GameUI extends javax.swing.JFrame {
         board.setLabelFor(board);
         board.setMinimumSize(new java.awt.Dimension(500, 507));
         getContentPane().add(board);
-        board.setBounds(40, 30, 403, 403);
+        board.setBounds(40, 40, 403, 403);
 
         background.setFont(new java.awt.Font("Lucida Grande", 0, 36)); // NOI18N
         background.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -344,6 +370,9 @@ public class GameUI extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel background;
     private javax.swing.JLabel board;
+    private javax.swing.JLabel coordinateX;
+    private javax.swing.JLabel coordinateY;
+    private javax.swing.JLabel coordinate_Show;
     private javax.swing.JCheckBox hint;
     private javax.swing.JLabel info;
     private javax.swing.JLabel playIcon;
