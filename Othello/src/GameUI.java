@@ -303,11 +303,11 @@ public class GameUI extends javax.swing.JFrame {
     
     public void computer3(int board[][]){
         
-        minimax(board, 8, Integer.MIN_VALUE, Integer.MAX_VALUE, true, player);     
+        int num = minimax(board, 6, Integer.MIN_VALUE, Integer.MAX_VALUE, true, player);     
         
-        System.out.println("miniMax: " + targetX + " " + targetY);
+        System.out.println("\n------------------------\nScore: " + num);
         
-        boolean temp = putChess(board, targetX, targetY);
+        putChess(board, targetX, targetY);
         
         showBord();
         showInfo();
@@ -325,7 +325,7 @@ public class GameUI extends javax.swing.JFrame {
         int[] canPut = analysis_CanPut(board);//分析可下數
         
         if(depth <= 0 | (canPut[0]==0 & canPut[1]==0)){//搜到底 回傳當局分數
-            return sore(board, player);
+            return 2*sore(board, player) - sore(board, 1 - player);
         }else if(canPut[this.player] == 0){
             System.out.println("預測出現換手下!");
             jump2step = true;
@@ -357,7 +357,6 @@ public class GameUI extends javax.swing.JFrame {
                 this.player = 1 - this.player;
 
                 if(value > max){
-                    System.out.println("max" + value);
                     max = value;
                     targetX = (int)data.get(i) / 8;
                     targetY = (int)data.get(i) % 8;   
@@ -388,8 +387,6 @@ public class GameUI extends javax.swing.JFrame {
                 if(alpha >= beta)//alpha beta pruning
                     break;
             }
-//            if(jump2step)
-//                this.player = 1 - this.player;
             return min;
         }
     }
@@ -404,7 +401,7 @@ public class GameUI extends javax.swing.JFrame {
     }
     
     int sore(int board[][], int player){
-        return 2*alive_Score(board, player) + 1*mobility_Score(board, player) + 1*weight_Score(board, player);
+        return 5*alive_Score(board, player) + 1*mobility_Score(board, player) + 1*weight_Score(board, player);
     }
     
     int alive_Score(int board[][], int player){
