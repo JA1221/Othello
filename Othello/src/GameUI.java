@@ -1,6 +1,9 @@
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import static java.lang.Integer.max;
+import static java.lang.Integer.min;
+import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -38,9 +41,8 @@ public class GameUI extends javax.swing.JFrame {
                         showBord();
                         showInfo();
                         endJudgment();
-//                        if(endJudgment())
-//                            computer();
-                    }
+                        
+                    }     
                 });                
             }       
         }
@@ -71,6 +73,7 @@ public class GameUI extends javax.swing.JFrame {
         chessBoard[4][3] = 0;
         chessBoard[4][4] = 1;
         player = 0;//黑手先
+        jump2step = false;
         
         showBord();
         showInfo();
@@ -295,7 +298,100 @@ public class GameUI extends javax.swing.JFrame {
         showBord();
         showInfo();
         endJudgment();
-        System.out.println(max);
+        System.out.println("分數max : " + max);
+    }
+    
+    public void computer3(int board[][]){
+        
+        minimax(board, 8, Integer.MIN_VALUE, Integer.MAX_VALUE, true, player);     
+        
+        System.out.println("miniMax: " + targetX + " " + targetY);
+        
+        boolean temp = putChess(board, targetX, targetY);
+        
+        showBord();
+        showInfo();
+        endJudgment();
+    }
+    
+    
+    int minimax(int board[][], int depth, int alpha, int beta, boolean minimaxFlag , int player){
+        int targetX = 0;
+        int targetY = 0;
+        
+        int tempBoard[][];
+        
+        ArrayList data = new ArrayList();//可下的可能性
+        int[] canPut = analysis_CanPut(board);//分析可下數
+        
+        if(depth <= 0 | (canPut[0]==0 & canPut[1]==0)){//搜到底 回傳當局分數
+            return sore(board, player);
+        }else if(canPut[this.player] == 0){
+            System.out.println("預測出現換手下!");
+            jump2step = true;
+            this.player = 1 - this.player;
+            
+            int num = minimax(board, depth - 1, alpha, beta, !minimaxFlag, player);
+            this.player = 1 - this.player;
+            
+            return num;
+        }
+        
+        //創建可能性data
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                if(board[i][j]==2 & putCheck(board, i, j, this.player, false))
+                    data.add(i*8 + j);
+            }
+        }      
+        //************************* min max *********************************
+        if(minimaxFlag){
+            int max = Integer.MIN_VALUE;
+            
+            for(int i = 0; i < data.size(); i++){
+                tempBoard = copy_Array(board);//建新棋盤
+                
+                putChess(tempBoard, (int)data.get(i) /8 , (int)data.get(i) %8);
+                //所有機會都搜一遍
+                int value = minimax(tempBoard, depth - 1, alpha, beta, !minimaxFlag, player);
+                this.player = 1 - this.player;
+
+                if(value > max){
+                    System.out.println("max" + value);
+                    max = value;
+                    targetX = (int)data.get(i) / 8;
+                    targetY = (int)data.get(i) % 8;   
+                }
+                
+                alpha = max(alpha, value);
+                if(alpha >= beta)//alpha beta pruning
+                    break;
+            }
+            
+            this.targetX = targetX;
+            this.targetY = targetY;
+            
+            return max;
+        }else{
+            int min = Integer.MAX_VALUE;
+            
+            for(int i = 0; i < data.size(); i++){
+                tempBoard = copy_Array(board);//創建新陣列
+                
+                putChess(tempBoard, (int)data.get(i) /8 , (int)data.get(i) %8);
+                
+                int value = minimax(tempBoard, depth - 1, alpha, beta, !minimaxFlag, player);
+                this.player = 1 - this.player;
+                min = min(min, value);
+                
+                beta = min(beta, value);
+                if(alpha >= beta)//alpha beta pruning
+                    break;
+            }
+//            if(jump2step)
+//                this.player = 1 - this.player;
+            return min;
+        }
     }
     
     public void AIcomputer(int board[][], int depth, int alpha, int beta, boolean minimaxFlag){
@@ -308,7 +404,7 @@ public class GameUI extends javax.swing.JFrame {
     }
     
     int sore(int board[][], int player){
-        return 2*alive_Score(board, player) + 1*mobility_Score(board, player) + 3*weight_Score(board, player);
+        return 2*alive_Score(board, player) + 1*mobility_Score(board, player) + 1*weight_Score(board, player);
     }
     
     int alive_Score(int board[][], int player){
@@ -463,7 +559,8 @@ public class GameUI extends javax.swing.JFrame {
 
     private void computerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_computerActionPerformed
         // TODO add your handling code here:
-        computer2(chessBoard);
+//        computer2(chessBoard);
+        computer3(chessBoard);
     }//GEN-LAST:event_computerActionPerformed
 
     /**
@@ -512,6 +609,9 @@ public class GameUI extends javax.swing.JFrame {
     private int canPut[] = {0, 0};
     private int player = 0;//0黑 1白
     private boolean putHint = false;
+    int targetX, targetY;
+    boolean jump2step = false;
+    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel background;
