@@ -303,7 +303,7 @@ public class GameUI extends javax.swing.JFrame {
     
     public void computer3(int board[][]){
         
-        int num = minimax(board, 6, Integer.MIN_VALUE, Integer.MAX_VALUE, true, player);     
+        int num = minimax(board, 7, Integer.MIN_VALUE, Integer.MAX_VALUE, true, player);     
         
         System.out.println("\n------------------------\nScore: " + num);
         
@@ -325,7 +325,7 @@ public class GameUI extends javax.swing.JFrame {
         int[] canPut = analysis_CanPut(board);//分析可下數
         
         if(depth <= 0 | (canPut[0]==0 & canPut[1]==0)){//搜到底 回傳當局分數
-            return 2*sore(board, player) - sore(board, 1 - player);
+            return 3*sore(board, player) - sore(board, 1 - player);
         }else if(canPut[this.player] == 0){
             System.out.println("預測出現換手下!");
             jump2step = true;
@@ -391,17 +391,8 @@ public class GameUI extends javax.swing.JFrame {
         }
     }
     
-    public void AIcomputer(int board[][], int depth, int alpha, int beta, boolean minimaxFlag){
-        if(depth==0)
-
-        System.out.println("alive_Score:" + alive_Score(board , player));
-        System.out.println("mobility_Score:" + mobility_Score(board, player));
-        System.out.println("weight_Score:" + weight_Score(board, player));      
-        
-    }
-    
     int sore(int board[][], int player){
-        return 5*alive_Score(board, player) + 1*mobility_Score(board, player) + 1*weight_Score(board, player);
+        return 3*alive_Score(board, player) + 2*mobility_Score(board, player) + 3*weight_Score(board, player);
     }
     
     int alive_Score(int board[][], int player){
@@ -475,7 +466,7 @@ public class GameUI extends javax.swing.JFrame {
             }
         });
         getContentPane().add(computer);
-        computer.setBounds(540, 310, 97, 23);
+        computer.setBounds(540, 310, 100, 30);
 
         coordinateX.setFont(new java.awt.Font("Times New Roman", 0, 42)); // NOI18N
         coordinateX.setText("<html> <body>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<body> </html> ");
